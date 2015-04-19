@@ -1,12 +1,17 @@
 package spring.security.rest.api.service;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphabetic;
+
 import java.util.List;
+
 import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,6 +53,25 @@ public class CustomerDetailService {
 	@ResponseBody
 	public List<CustomerDetails> findAll() {
 		return Lists.newArrayList(new CustomerDetails(randomAlphabetic(6)));
+	}
+	
+	@RequestMapping(value = "/principal", method = RequestMethod.GET, consumes = { MediaType.APPLICATION_JSON_VALUE })
+	@ResponseBody
+	public UserDetails getPrincipal() {
+		UserDetails result = null;
+		Object principal = null;
+
+		if (SecurityContextHolder.getContext() != null
+				&& SecurityContextHolder.getContext().getAuthentication() != null) {
+			principal = SecurityContextHolder.getContext().getAuthentication()
+					.getPrincipal();
+		}
+		if (principal instanceof UserDetails) {
+			result = (UserDetails) SecurityContextHolder.getContext()
+					.getAuthentication().getPrincipal();
+		}
+
+		return result;
 	}
 
 }
